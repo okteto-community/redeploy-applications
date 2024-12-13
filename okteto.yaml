@@ -1,0 +1,12 @@
+build:
+  redeploy:
+    context: .
+
+deploy:
+  remote: true
+  commands:
+    - name: Create Secret
+      command: kubectl create secret generic redeploy-secret --save-config --dry-run=client --from-literal=OKTETO_URL=${OKTETO_CONTEXT} --from-literal=OKTETO_TOKEN=${OKTETO_ADMIN_TOKEN} --from-literal=TARGET_REPOSITORY=${TARGET_REPOSITORY} --from-literal=TARGET_BRANCH=${TARGET_BRANCH} -oyaml | kubectl apply -f -
+    - name: Create Cronjob
+      command: |# we use cat so the manifest will pick up the image using the environment variables
+        envsubst < cronjob.yaml | kubectl apply -f -
