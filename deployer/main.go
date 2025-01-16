@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/okteto-community/redeploy-applications/deployer/api"
-	"github.com/okteto-community/redeploy-applications/deployer/git"
 )
 
 const redeployAppCommandTemplate = "okteto pipeline deploy -n \"%s\" --name \"%s\" --repository \"%s\" --branch \"%s\" --reuse-params --wait=false"
@@ -17,7 +16,7 @@ const redeployAppCommandTemplate = "okteto pipeline deploy -n \"%s\" --name \"%s
 func main() {
 	token := os.Getenv("OKTETO_TOKEN")
 	oktetoURL := os.Getenv("OKTETO_URL")
-	targetRepo := os.Getenv("TARGET_REPOSITORY")
+	// targetRepo := os.Getenv("TARGET_REPOSITORY")
 	targetBranch := os.Getenv("TARGET_BRANCH")
 
 	logLevel := &slog.LevelVar{} // INFO
@@ -26,8 +25,8 @@ func main() {
 	}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, opts))
 
-	if token == "" || oktetoURL == "" || targetRepo == "" {
-		logger.Error("OKTETO_TOKEN, OKTETO_URL and TARGET_REPOSITORY environment variables are required")
+	if token == "" || oktetoURL == "" {
+		logger.Error("OKTETO_TOKEN, OKTETO_URL environment variables are required")
 		os.Exit(1)
 	}
 
@@ -42,8 +41,6 @@ func main() {
 		logger.Error(fmt.Sprintf("There was an error requesting the namespaces: %s", err))
 		os.Exit(1)
 	}
-
-	logger.Info(fmt.Sprintf("Looking for dev environments with repository %q", targetRepo))
 
 	// We check for applications that were last updated more than 24 hours ago
 	updateThreshold := time.Now().Add(-time.Hour * 24)
@@ -63,10 +60,10 @@ func main() {
 				continue
 			}
 
-			if !git.AreSameRepository(app.Repository, targetRepo) {
-				logger.Info(fmt.Sprintf("Skipping application '%s' within namespace '%s' as repository doesn't match", app.Name, ns.Name))
-				continue
-			}
+			// if !git.AreSameRepository(app.Repository, targetRepo) {
+			// 	logger.Info(fmt.Sprintf("Skipping application '%s' within namespace '%s' as repository doesn't match", app.Name, ns.Name))
+			// 	continue
+			// }
 
 			if targetBranch != "" && app.Branch != targetBranch {
 				logger.Info(fmt.Sprintf("Skipping application '%s' within namespace '%s' as deployed branch doesn't match", app.Name, ns.Name))
