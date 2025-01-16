@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: redeploy-apps
+  labels:
+    app: redeploy-apps
 spec:
   schedule: "${REDEPLOY_JOB_SCHEDULE}"
   jobTemplate:
